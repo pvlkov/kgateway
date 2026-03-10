@@ -257,7 +257,7 @@ func (p *Provider) EventuallyTLSRouteCondition(
 	ginkgo.GinkgoHelper()
 	currentTimeout, pollingInterval := helpers.GetTimeouts(timeout...)
 	p.Gomega.Eventually(func(g gomega.Gomega) {
-		route := &gwv1a2.TLSRoute{}
+		route := &gwv1.TLSRoute{}
 		err := p.clusterContext.Client.Get(ctx, types.NamespacedName{Name: routeName, Namespace: routeNamespace}, route)
 		g.Expect(err).NotTo(gomega.HaveOccurred(), fmt.Sprintf("failed to get TLSRoute %s/%s", routeNamespace, routeName))
 		g.Expect(extractParentConditions(route.Status.Parents)).To(matchers.HaveAnyParentCondition(string(cond), expect))
@@ -297,13 +297,13 @@ func (p *Provider) EventuallyListenerSetStatus(
 	ctx context.Context,
 	name string,
 	namespace string,
-	status gwxv1a1.ListenerSetStatus,
+	status gwv1.ListenerSetStatus,
 	timeout ...time.Duration,
 ) {
 	ginkgo.GinkgoHelper()
 	currentTimeout, pollingInterval := helpers.GetTimeouts(timeout...)
 	p.Gomega.Eventually(func(g gomega.Gomega) {
-		ls := &gwxv1a1.XListenerSet{}
+		ls := &gwv1.ListenerSet{}
 		err := p.clusterContext.Client.Get(ctx, types.NamespacedName{Name: name, Namespace: namespace}, ls)
 		g.Expect(err).NotTo(gomega.HaveOccurred(), fmt.Sprintf("failed to get listenerset %s/%s", namespace, name))
 
@@ -319,9 +319,6 @@ func (p *Provider) EventuallyListenerSetStatus(
 		for _, expectedListener := range status.Listeners {
 			listenerStatus := getListenerEntryStatus(ls.Status.Listeners, string(expectedListener.Name))
 			g.Expect(listenerStatus).NotTo(gomega.BeNil(), fmt.Sprintf("%v listener status not found for listener %s. Full status: %+v", expectedListener.Name, expectedListener.Name, ls.Status))
-			if expectedListener.Port != 0 {
-				g.Expect(listenerStatus.Port).To(gomega.Equal(expectedListener.Port), fmt.Sprintf("%v listener condition is not %v for listener %s. Full status: %+v", expectedListener, expectedListener.Port, expectedListener.Name, ls.Status))
-			}
 			if expectedListener.AttachedRoutes != 0 {
 				g.Expect(listenerStatus.AttachedRoutes).To(gomega.Equal(expectedListener.AttachedRoutes), fmt.Sprintf("%v condition is not %v for listener %s. Full status: %+v", expectedListener, expectedListener.AttachedRoutes, expectedListener.Name, ls.Status))
 			}

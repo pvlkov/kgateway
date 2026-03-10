@@ -74,7 +74,7 @@ func tcpToIr(tcpRoute *gwv1a2.TCPRoute) *ir.TcpRouteIR {
 	return routeir
 }
 
-func tlsToIr(tlsRoute *gwv1a2.TLSRoute) *ir.TlsRouteIR {
+func tlsToIr(tlsRoute *gwv1.TLSRoute) *ir.TlsRouteIR {
 	routeir := &ir.TlsRouteIR{
 		ObjectSource: ir.ObjectSource{
 			Namespace: tlsRoute.Namespace,
@@ -678,7 +678,7 @@ var _ = Describe("Translator TCPRoute Listener", func() {
 		Describe("translates gateway API resources to kgateway proxy listeners", func() {
 			It("should create a TLS listener with multiple backend references", func() {
 				tlsRoute := tlsRoute("test-tls-route")
-				tlsRoute.Spec = gwv1a2.TLSRouteSpec{
+				tlsRoute.Spec = gwv1.TLSRouteSpec{
 					CommonRouteSpec: gwv1.CommonRouteSpec{
 						ParentRefs: []gwv1.ParentReference{
 							{
@@ -689,7 +689,7 @@ var _ = Describe("Translator TCPRoute Listener", func() {
 						},
 					},
 					Hostnames: []gwv1a2.Hostname{"example.com"},
-					Rules: []gwv1a2.TLSRouteRule{
+					Rules: []gwv1.TLSRouteRule{
 						{
 							BackendRefs: []gwv1.BackendRef{
 								{
@@ -739,7 +739,7 @@ var _ = Describe("Translator TCPRoute Listener", func() {
 			It("should skip routes with invalid parent references and process valid ones", func() {
 				By("Creating a TLSRoute with a backend reference")
 				validRoute := tlsRoute("valid-tls-route")
-				validRoute.Spec = gwv1a2.TLSRouteSpec{
+				validRoute.Spec = gwv1.TLSRouteSpec{
 					CommonRouteSpec: gwv1.CommonRouteSpec{
 						ParentRefs: []gwv1.ParentReference{
 							{
@@ -749,7 +749,7 @@ var _ = Describe("Translator TCPRoute Listener", func() {
 							},
 						},
 					},
-					Rules: []gwv1a2.TLSRouteRule{
+					Rules: []gwv1.TLSRouteRule{
 						{
 							BackendRefs: []gwv1.BackendRef{
 								{
@@ -766,7 +766,7 @@ var _ = Describe("Translator TCPRoute Listener", func() {
 
 				By("Creating an invalid TLSRoute with no parent references")
 				invalidRoute := tlsRoute("invalid-tls-route")
-				invalidRoute.Spec = gwv1a2.TLSRouteSpec{
+				invalidRoute.Spec = gwv1.TLSRouteSpec{
 					CommonRouteSpec: gwv1.CommonRouteSpec{
 						ParentRefs: []gwv1.ParentReference{}, // No parent reference provided
 					},
@@ -802,7 +802,7 @@ var _ = Describe("Translator TCPRoute Listener", func() {
 			It("should create a TLS listener with a single weighted backend reference", func() {
 				By("Creating a weighted TLSRoute with a single backend reference")
 				tlsRoute := tlsRoute("test-tls-route")
-				tlsRoute.Spec = gwv1a2.TLSRouteSpec{
+				tlsRoute.Spec = gwv1.TLSRouteSpec{
 					CommonRouteSpec: gwv1.CommonRouteSpec{
 						ParentRefs: []gwv1.ParentReference{
 							{
@@ -812,7 +812,7 @@ var _ = Describe("Translator TCPRoute Listener", func() {
 							},
 						},
 					},
-					Rules: []gwv1a2.TLSRouteRule{
+					Rules: []gwv1.TLSRouteRule{
 						{
 							BackendRefs: []gwv1.BackendRef{
 								{
@@ -983,11 +983,11 @@ func tcpRoute(name string) *gwv1a2.TCPRoute {
 	}
 }
 
-func tlsRoute(name string) *gwv1a2.TLSRoute {
-	return &gwv1a2.TLSRoute{
+func tlsRoute(name string) *gwv1.TLSRoute {
+	return &gwv1.TLSRoute{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       wellknown.TLSRouteKind,
-			APIVersion: gwv1a2.GroupVersion.String(),
+			APIVersion: gwv1.GroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,

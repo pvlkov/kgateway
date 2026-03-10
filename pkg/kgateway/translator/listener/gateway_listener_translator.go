@@ -14,7 +14,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	gwv1 "sigs.k8s.io/gateway-api/apis/v1"
-	gwxv1a1 "sigs.k8s.io/gateway-api/apisx/v1alpha1"
 
 	"github.com/kgateway-dev/kgateway/v2/api/annotations"
 	"github.com/kgateway-dev/kgateway/v2/pkg/kgateway/extensions2/plugins/listenerpolicy"
@@ -895,8 +894,8 @@ func translateTLSConfig(
 			switch listener.Parent.(type) {
 			case *gwv1.Gateway:
 				parentGVK = wellknown.GatewayGVK
-			case *gwxv1a1.XListenerSet:
-				parentGVK = wellknown.XListenerSetGVK
+			case *gwv1.ListenerSet:
+				parentGVK = wellknown.ListenerSetGVK
 			}
 		}
 
@@ -1150,8 +1149,8 @@ func applyClientCertificateValidation(
 		switch listener.Parent.(type) {
 		case *gwv1.Gateway:
 			parentGVK = wellknown.GatewayGVK
-		case *gwxv1a1.XListenerSet:
-			parentGVK = wellknown.XListenerSetGVK
+		case *gwv1.ListenerSet:
+			parentGVK = wellknown.ListenerSetGVK
 		default:
 			return false, fmt.Errorf("unsupported parent type: %T", listener.Parent)
 		}

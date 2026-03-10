@@ -10,7 +10,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	gwv1 "sigs.k8s.io/gateway-api/apis/v1"
 	gwv1a2 "sigs.k8s.io/gateway-api/apis/v1alpha2"
-	gwxv1a1 "sigs.k8s.io/gateway-api/apisx/v1alpha1"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -360,7 +359,7 @@ var _ = Describe("Reporting Infrastructure", func() {
 					route.Status.RouteStatus = *status
 				case *gwv1a2.TCPRoute:
 					route.Status.RouteStatus = *status
-				case *gwv1a2.TLSRoute:
+				case *gwv1.TLSRoute:
 					route.Status.RouteStatus = *status
 				case *gwv1.GRPCRoute:
 					route.Status.RouteStatus = *status
@@ -397,7 +396,7 @@ var _ = Describe("Reporting Infrastructure", func() {
 					route.Spec.ParentRefs = append(route.Spec.ParentRefs, gwv1.ParentReference{
 						Name: "additional-gateway",
 					})
-				case *gwv1a2.TLSRoute:
+				case *gwv1.TLSRoute:
 					route.Spec.ParentRefs = append(route.Spec.ParentRefs, gwv1.ParentReference{
 						Name: "additional-gateway",
 					})
@@ -441,7 +440,7 @@ var _ = Describe("Reporting Infrastructure", func() {
 					r1.Spec.ParentRefs[0].SectionName = new(gwv1.SectionName(listener1.Name))
 				case *gwv1a2.TCPRoute:
 					r1.Spec.ParentRefs[0].SectionName = new(gwv1.SectionName(listener1.Name))
-				case *gwv1a2.TLSRoute:
+				case *gwv1.TLSRoute:
 					r1.Spec.ParentRefs[0].SectionName = new(gwv1.SectionName(listener1.Name))
 				case *gwv1.GRPCRoute:
 					r1.Spec.ParentRefs[0].SectionName = new(gwv1.SectionName(listener1.Name))
@@ -453,7 +452,7 @@ var _ = Describe("Reporting Infrastructure", func() {
 					r2.Spec.ParentRefs[0].SectionName = new(gwv1.SectionName(listener2.Name))
 				case *gwv1a2.TCPRoute:
 					r2.Spec.ParentRefs[0].SectionName = new(gwv1.SectionName(listener2.Name))
-				case *gwv1a2.TLSRoute:
+				case *gwv1.TLSRoute:
 					r2.Spec.ParentRefs[0].SectionName = new(gwv1.SectionName(listener2.Name))
 				case *gwv1.GRPCRoute:
 					r2.Spec.ParentRefs[0].SectionName = new(gwv1.SectionName(listener2.Name))
@@ -505,7 +504,7 @@ var _ = Describe("Reporting Infrastructure", func() {
 				r.Spec.ParentRefs = nil
 			case *gwv1a2.TCPRoute:
 				r.Spec.ParentRefs = nil
-			case *gwv1a2.TLSRoute:
+			case *gwv1.TLSRoute:
 				r.Spec.ParentRefs = nil
 			case *gwv1.GRPCRoute:
 				r.Spec.ParentRefs = nil
@@ -670,12 +669,12 @@ var _ = Describe("Reporting Infrastructure", func() {
 			r.ListenerSet(ls).SetCondition(reporter.GatewayCondition{
 				Type:   gwv1.GatewayConditionAccepted,
 				Status: metav1.ConditionFalse,
-				Reason: gwv1.GatewayConditionReason(gwxv1a1.ListenerSetReasonNotAllowed),
+				Reason: gwv1.GatewayConditionReason(gwv1.ListenerSetReasonNotAllowed),
 			})
 			r.ListenerSet(ls).SetCondition(reporter.GatewayCondition{
 				Type:   gwv1.GatewayConditionProgrammed,
 				Status: metav1.ConditionFalse,
-				Reason: gwv1.GatewayConditionReason(gwxv1a1.ListenerSetReasonNotAllowed),
+				Reason: gwv1.GatewayConditionReason(gwv1.ListenerSetReasonNotAllowed),
 			})
 
 			status := rm.BuildListenerSetStatus(context.Background(), *ls)
@@ -703,7 +702,7 @@ func fakeTranslate(reporter reporter.Reporter, obj client.Object) {
 		for _, pr := range route.Spec.ParentRefs {
 			routeReporter.ParentRef(&pr)
 		}
-	case *gwv1a2.TLSRoute:
+	case *gwv1.TLSRoute:
 		routeReporter := reporter.Route(route)
 		for _, pr := range route.Spec.ParentRefs {
 			routeReporter.ParentRef(&pr)
@@ -753,7 +752,7 @@ func tcpRoute(conditions ...metav1.Condition) client.Object {
 }
 
 func tlsRoute(conditions ...metav1.Condition) client.Object {
-	route := &gwv1a2.TLSRoute{
+	route := &gwv1.TLSRoute{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "route",
 			Namespace: "default",
@@ -844,14 +843,14 @@ func listener() *gwv1.Listener {
 	}
 }
 
-func ls() *gwxv1a1.XListenerSet {
-	ls := &gwxv1a1.XListenerSet{
+func ls() *gwv1.ListenerSet {
+	ls := &gwv1.ListenerSet{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "default",
 			Name:      "test",
 		},
 	}
-	ls.Spec.Listeners = []gwxv1a1.ListenerEntry{
+	ls.Spec.Listeners = []gwv1.ListenerEntry{
 		{
 			Name: "http",
 		},

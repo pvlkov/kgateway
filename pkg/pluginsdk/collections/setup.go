@@ -10,7 +10,6 @@ import (
 	"istio.io/istio/pkg/util/smallset"
 	gwv1 "sigs.k8s.io/gateway-api/apis/v1"
 	gwv1a2 "sigs.k8s.io/gateway-api/apis/v1alpha2"
-	gwxv1a1 "sigs.k8s.io/gateway-api/apisx/v1alpha1"
 
 	apisettings "github.com/kgateway-dev/kgateway/v2/api/settings"
 	"github.com/kgateway-dev/kgateway/v2/pkg/kgateway/wellknown"
@@ -39,16 +38,9 @@ func (c *CommonCollections) InitCollections(
 	kubeRawGateways := krt.WrapClient(kclient.NewFilteredDelayed[*gwv1.Gateway](c.Client, wellknown.GatewayGVR, filter), c.KrtOpts.ToOptions("KubeGateways")...)
 	metrics.RegisterEvents(kubeRawGateways, kmetrics.GetResourceMetricEventHandler[*gwv1.Gateway]())
 
-	var kubeRawListenerSets krt.Collection[*gwxv1a1.XListenerSet]
-	// ON_EXPERIMENTAL_PROMOTION : Remove this block
-	// Ref: https://github.com/kgateway-dev/kgateway/issues/12827
-	if globalSettings.EnableExperimentalGatewayAPIFeatures {
-		kubeRawListenerSets = krt.WrapClient(kclient.NewDelayedInformer[*gwxv1a1.XListenerSet](c.Client, wellknown.XListenerSetGVR, kubetypes.StandardInformer, filter), c.KrtOpts.ToOptions("KubeListenerSets")...)
-	} else {
-		// If disabled, still build a collection but make it always empty
-		kubeRawListenerSets = krt.NewStaticCollection[*gwxv1a1.XListenerSet](nil, nil, c.KrtOpts.ToOptions("disable/KubeListenerSets")...)
-	}
-	metrics.RegisterEvents(kubeRawListenerSets, kmetrics.GetResourceMetricEventHandler[*gwxv1a1.XListenerSet]())
+	var kubeRawListenerSets krt.Collection[*gwv1.ListenerSet]
+	kubeRawListenerSets = krt.WrapClient(kclient.NewDelayedInformer[*gwv1.ListenerSet](c.Client, wellknown.ListenerSetGVR, kubetypes.StandardInformer, filter), c.KrtOpts.ToOptions("KubeListenerSets")...)
+	metrics.RegisterEvents(kubeRawListenerSets, kmetrics.GetResourceMetricEventHandler[*gwv1.ListenerSet]())
 
 	var policies *krtcollections.PolicyIndex
 	if globalSettings.EnableEnvoy {
@@ -83,21 +75,12 @@ func (c *CommonCollections) InitCollections(
 	httpRoutes := krt.WrapClient(kclient.NewFilteredDelayed[*gwv1.HTTPRoute](c.Client, wellknown.HTTPRouteGVR, filter), c.KrtOpts.ToOptions("HTTPRoute")...)
 	metrics.RegisterEvents(httpRoutes, kmetrics.GetResourceMetricEventHandler[*gwv1.HTTPRoute]())
 
-	// ON_EXPERIMENTAL_PROMOTION : Remove this block
-	// Ref: https://github.com/kgateway-dev/kgateway/issues/12879
 	var tcproutes krt.Collection[*gwv1a2.TCPRoute]
-	// Ref: https://github.com/kgateway-dev/kgateway/issues/12880
-	var tlsRoutes krt.Collection[*gwv1a2.TLSRoute]
-	if globalSettings.EnableExperimentalGatewayAPIFeatures {
-		tcproutes = krt.WrapClient(kclient.NewDelayedInformer[*gwv1a2.TCPRoute](c.Client, gvr.TCPRoute, kubetypes.StandardInformer, filter), c.KrtOpts.ToOptions("TCPRoute")...)
-		tlsRoutes = krt.WrapClient(kclient.NewDelayedInformer[*gwv1a2.TLSRoute](c.Client, gvr.TLSRoute, kubetypes.StandardInformer, filter), c.KrtOpts.ToOptions("TLSRoute")...)
-	} else {
-		// If disabled, still build a collection but make it always empty
-		tcproutes = krt.NewStaticCollection[*gwv1a2.TCPRoute](nil, nil, c.KrtOpts.ToOptions("disable/TCPRoute")...)
-		tlsRoutes = krt.NewStaticCollection[*gwv1a2.TLSRoute](nil, nil, c.KrtOpts.ToOptions("disable/TLSRoute")...)
-	}
+	var tlsRoutes krt.Collection[*gwv1.TLSRoute]
+	tcproutes = krt.WrapClient(kclient.NewDelayedInformer[*gwv1a2.TCPRoute](c.Client, gvr.TCPRoute, kubetypes.StandardInformer, filter), c.KrtOpts.ToOptions("TCPRoute")...)
+	tlsRoutes = krt.WrapClient(kclient.NewDelayedInformer[*gwv1.TLSRoute](c.Client, gvr.TLSRoute, kubetypes.StandardInformer, filter), c.KrtOpts.ToOptions("TLSRoute")...)
 	metrics.RegisterEvents(tcproutes, kmetrics.GetResourceMetricEventHandler[*gwv1a2.TCPRoute]())
-	metrics.RegisterEvents(tlsRoutes, kmetrics.GetResourceMetricEventHandler[*gwv1a2.TLSRoute]())
+	metrics.RegisterEvents(tlsRoutes, kmetrics.GetResourceMetricEventHandler[*gwv1.TLSRoute]())
 
 	grpcRoutes := krt.WrapClient(kclient.NewFilteredDelayed[*gwv1.GRPCRoute](c.Client, wellknown.GRPCRouteGVR, filter), c.KrtOpts.ToOptions("GRPCRoute")...)
 	metrics.RegisterEvents(grpcRoutes, kmetrics.GetResourceMetricEventHandler[*gwv1.GRPCRoute]())

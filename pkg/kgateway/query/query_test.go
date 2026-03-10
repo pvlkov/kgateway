@@ -15,7 +15,6 @@ import (
 	gwv1 "sigs.k8s.io/gateway-api/apis/v1"
 	gwv1a2 "sigs.k8s.io/gateway-api/apis/v1alpha2"
 	gwv1b1 "sigs.k8s.io/gateway-api/apis/v1beta1"
-	gwxv1a1 "sigs.k8s.io/gateway-api/apisx/v1alpha1"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -622,7 +621,7 @@ var _ = Describe("Query", func() {
 			},
 		}
 
-		tlsRoute := &gwv1a2.TLSRoute{
+		tlsRoute := &gwv1.TLSRoute{
 			TypeMeta: metav1.TypeMeta{
 				Kind:       wellknown.TLSRouteKind,
 				APIVersion: gwv1a2.GroupVersion.String(),
@@ -631,7 +630,7 @@ var _ = Describe("Query", func() {
 				Name:      "test-tls-route",
 				Namespace: gw.Namespace,
 			},
-			Spec: gwv1a2.TLSRouteSpec{
+			Spec: gwv1.TLSRouteSpec{
 				CommonRouteSpec: gwv1.CommonRouteSpec{
 					ParentRefs: []gwv1.ParentReference{
 						{
@@ -665,7 +664,7 @@ var _ = Describe("Query", func() {
 		}
 
 		tlsRoute := tlsRoute("other-ns")
-		tlsRoute.Spec = gwv1a2.TLSRouteSpec{
+		tlsRoute.Spec = gwv1.TLSRouteSpec{
 			CommonRouteSpec: gwv1.CommonRouteSpec{
 				ParentRefs: []gwv1.ParentReference{
 					{
@@ -701,7 +700,7 @@ var _ = Describe("Query", func() {
 
 		tlsRoute := tlsRoute(gw.Namespace)
 		var badPort gwv1.PortNumber = 9999
-		tlsRoute.Spec = gwv1a2.TLSRouteSpec{
+		tlsRoute.Spec = gwv1.TLSRouteSpec{
 			CommonRouteSpec: gwv1.CommonRouteSpec{
 				ParentRefs: []gwv1.ParentReference{
 					{
@@ -735,7 +734,7 @@ var _ = Describe("Query", func() {
 		}
 
 		tlsRoute := tlsRoute(gw.Namespace)
-		tlsRoute.Spec = gwv1a2.TLSRouteSpec{
+		tlsRoute.Spec = gwv1.TLSRouteSpec{
 			CommonRouteSpec: gwv1.CommonRouteSpec{
 				ParentRefs: []gwv1.ParentReference{
 					{
@@ -773,7 +772,7 @@ var _ = Describe("Query", func() {
 		}
 
 		tlsRoute := tlsRoute(gw.Namespace)
-		tlsRoute.Spec = gwv1a2.TLSRouteSpec{
+		tlsRoute.Spec = gwv1.TLSRouteSpec{
 			CommonRouteSpec: gwv1.CommonRouteSpec{
 				ParentRefs: []gwv1.ParentReference{
 					{
@@ -988,8 +987,8 @@ var _ = Describe("Query", func() {
 
 		lsHR := httpRoute()
 		lsHR.Name = "ls-route"
-		lsKind := gwv1.Kind(wellknown.XListenerSetKind)
-		lsGroup := gwv1.Group(wellknown.XListenerSetGroup)
+		lsKind := gwv1.Kind(wellknown.ListenerSetKind)
+		lsGroup := gwv1.Group(wellknown.GatewayGroup)
 		lsHR.Spec.ParentRefs = []gwv1.ParentReference{
 			{
 				Kind:  &lsKind,
@@ -1001,7 +1000,7 @@ var _ = Describe("Query", func() {
 		irGW := ir.Gateway{
 			Obj: gwWithListener,
 			AllowedListenerSets: map[schema.GroupVersionKind]ir.ListenerSets{
-				wellknown.XListenerSetGVK: []ir.ListenerSet{{Obj: lsWithListener}},
+				wellknown.ListenerSetGVK: []ir.ListenerSet{{Obj: lsWithListener}},
 			},
 		}
 
@@ -1088,11 +1087,11 @@ func tcpRoute(ns string) *gwv1a2.TCPRoute {
 	}
 }
 
-func tlsRoute(ns string) *gwv1a2.TLSRoute {
-	return &gwv1a2.TLSRoute{
+func tlsRoute(ns string) *gwv1.TLSRoute {
+	return &gwv1.TLSRoute{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       wellknown.TLSRouteKind,
-			APIVersion: gwv1a2.GroupVersion.String(),
+			APIVersion: gwv1.GroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test-tls-route",
@@ -1139,7 +1138,7 @@ func newQueries(t test.Failer, initObjs ...client.Object) query.GatewayQueries {
 
 	httproutes := krttest.GetMockCollection[*gwv1.HTTPRoute](mock)
 	tcpproutes := krttest.GetMockCollection[*gwv1a2.TCPRoute](mock)
-	tlsroutes := krttest.GetMockCollection[*gwv1a2.TLSRoute](mock)
+	tlsroutes := krttest.GetMockCollection[*gwv1.TLSRoute](mock)
 	grpcroutes := krttest.GetMockCollection[*gwv1.GRPCRoute](mock)
 	rtidx := krtcollections.NewRoutesIndex(krtutil.KrtOptions{}, wellknown.DefaultGatewayControllerName, httproutes, grpcroutes, tcpproutes, tlsroutes, policies, upstreams, refgrants, apisettings.Settings{})
 	services.WaitUntilSynced(nil)
@@ -1192,24 +1191,24 @@ func k8sUpstreams(services krt.Collection[*corev1.Service]) krt.Collection[ir.Ba
 	})
 }
 
-func ls() *gwxv1a1.XListenerSet {
-	ls := &gwxv1a1.XListenerSet{
+func ls() *gwv1.ListenerSet {
+	ls := &gwv1.ListenerSet{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "default",
 			Name:      "ls",
 		},
-		Spec: gwxv1a1.ListenerSetSpec{
-			Listeners: []gwxv1a1.ListenerEntry{
+		Spec: gwv1.ListenerSetSpec{
+			Listeners: []gwv1.ListenerEntry{
 				{
 					Name:     "bar",
 					Protocol: gwv1.HTTPProtocolType,
 				},
 			},
-			ParentRef: gwxv1a1.ParentGatewayReference{
+			ParentRef: gwv1.ParentGatewayReference{
 				Name: "test",
 			},
 		},
 	}
-	ls.SetGroupVersionKind(wellknown.XListenerSetGVK)
+	ls.SetGroupVersionKind(wellknown.ListenerSetGVK)
 	return ls
 }

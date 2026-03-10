@@ -179,7 +179,7 @@ func (s *testingSuite) testMetrics(useListenerSets bool) {
 					Labels: []metrics.Label{
 						{Name: "namespace", Value: "default"},
 						{Name: "parent", Value: "gw1"},
-						{Name: "resource", Value: "XListenerSet"},
+						{Name: "resource", Value: "ListenerSet"},
 					},
 					Test: metricstest.Equal(1),
 				},

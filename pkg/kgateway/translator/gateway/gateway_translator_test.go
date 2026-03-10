@@ -2142,10 +2142,10 @@ func TestBasic(t *testing.T) {
 		})
 	})
 
-	t.Run("XListenerSet with reserved port should be rejected", func(t *testing.T) {
+	t.Run("ListenerSet with reserved port should be rejected", func(t *testing.T) {
 		test(t, translatorTestCase{
-			inputFile:  "validation/xlistenerset-reserved-port.yaml",
-			outputFile: "validation/xlistenerset-reserved-port.yaml",
+			inputFile:  "validation/listenerset-reserved-port.yaml",
+			outputFile: "validation/listenerset-reserved-port.yaml",
 			gwNN: types.NamespacedName{
 				Namespace: "default",
 				Name:      "test",
@@ -2459,15 +2459,15 @@ func TestValidation(t *testing.T) {
 			minMode:   apisettings.ValidationStandard,
 		},
 		{
-			name:      "XListenerSet",
+			name:      "ListenerSet",
 			category:  "attachment",
-			inputFile: "xlistenerset-invalid.yaml",
+			inputFile: "listenerset-invalid.yaml",
 			minMode:   apisettings.ValidationStandard,
 		},
 		{
-			name:      "XListenerSet/Listener",
+			name:      "ListenerSet/Listener",
 			category:  "attachment",
-			inputFile: "xlistenerset-listener-invalid.yaml",
+			inputFile: "listenerset-listener-invalid.yaml",
 			minMode:   apisettings.ValidationStandard,
 		},
 		{

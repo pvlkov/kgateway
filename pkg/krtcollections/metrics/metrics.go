@@ -10,7 +10,6 @@ import (
 	"istio.io/istio/pkg/kube/krt"
 	gwv1 "sigs.k8s.io/gateway-api/apis/v1"
 	gwv1a2 "sigs.k8s.io/gateway-api/apis/v1alpha2"
-	gwxv1a1 "sigs.k8s.io/gateway-api/apisx/v1alpha1"
 
 	"github.com/kgateway-dev/kgateway/v2/pkg/kgateway/wellknown"
 	"github.com/kgateway-dev/kgateway/v2/pkg/logging"
@@ -505,7 +504,7 @@ func GetResourceMetricEventHandler[T any]() func(krt.Event[T]) {
 					namesOld = append(namesOld, string(pr.Name))
 				}
 			}
-		case *gwv1a2.TLSRoute:
+		case *gwv1.TLSRoute:
 			resourceType = "TLSRoute"
 			resourceName = obj.Name
 			namespace = obj.Namespace
@@ -515,7 +514,7 @@ func GetResourceMetricEventHandler[T any]() func(krt.Event[T]) {
 			}
 
 			if clientObjectOld != nil {
-				oldObj := clientObjectOld.(*gwv1a2.TLSRoute)
+				oldObj := clientObjectOld.(*gwv1.TLSRoute)
 				namespaceOld = oldObj.Namespace
 				namesOld = make([]string, 0, len(oldObj.Spec.ParentRefs))
 				for _, pr := range oldObj.Spec.ParentRefs {
@@ -549,15 +548,15 @@ func GetResourceMetricEventHandler[T any]() func(krt.Event[T]) {
 				namespaceOld = clientObjectOld.(*gwv1.Gateway).Namespace
 				namesOld = []string{clientObjectOld.(*gwv1.Gateway).Name}
 			}
-		case *gwxv1a1.XListenerSet:
-			resourceType = "XListenerSet"
+		case *gwv1.ListenerSet:
+			resourceType = "ListenerSet"
 			resourceName = obj.Name
 			namespace = obj.Namespace
 			names = []string{string(obj.Spec.ParentRef.Name)}
 
 			if clientObjectOld != nil {
-				namespaceOld = clientObjectOld.(*gwxv1a1.XListenerSet).Namespace
-				namesOld = []string{string(clientObjectOld.(*gwxv1a1.XListenerSet).Spec.ParentRef.Name)}
+				namespaceOld = clientObjectOld.(*gwv1.ListenerSet).Namespace
+				namesOld = []string{string(clientObjectOld.(*gwv1.ListenerSet).Spec.ParentRef.Name)}
 			}
 		}
 
