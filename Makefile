@@ -58,7 +58,7 @@ comma := ,
 # this. Exported for use in goreleaser.yaml. Because our docker images are
 # tagged with a 'v' prefix, we use the prefix here and strip the 'v' prefix
 # where actual semver is desired.
-VERSION ?= v1.0.1-dev
+VERSION ?= v3.5.0-dev
 export VERSION
 
 SOURCES := $(shell find . -name "*.go" | grep -v test.go)
